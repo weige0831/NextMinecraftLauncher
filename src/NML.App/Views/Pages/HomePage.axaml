@@ -9,19 +9,22 @@
         <!--   top bar = instance selector + big LAUNCH on the same row   -->
         <!--   below   = compact toolbar, status, collapsible sections    -->
         <!-- ============================================================ -->
-        <ScrollViewer Padding="24,18" HorizontalScrollBarVisibility="Disabled">
-            <StackPanel Spacing="14" MaxWidth="760" HorizontalAlignment="Left">
+        <ScrollViewer Padding="28,20" HorizontalScrollBarVisibility="Disabled">
+            <StackPanel Spacing="16" MaxWidth="720" HorizontalAlignment="Stretch">
 
-                <!-- ===== LAUNCH BAR (instance picker + launch button on one row) ===== -->
-                <Border Background="{DynamicResource PanelBrush}" CornerRadius="6" Padding="16,14">
+                <!-- ===== HERO: instance picker + primary LAUNCH (Win11 card, accent button) ===== -->
+                <Border Background="{DynamicResource PanelBrush}" CornerRadius="8"
+                        BorderBrush="{DynamicResource CardStrokeBrush}" BorderThickness="1"
+                        Padding="20,16">
                     <Grid ColumnDefinitions="*,Auto">
-                        <StackPanel Grid.Column="0" Spacing="4" VerticalAlignment="Center" Margin="0,0,16,0">
+                        <StackPanel Grid.Column="0" Spacing="8" VerticalAlignment="Center" Margin="0,0,16,0">
                             <ComboBox ItemsSource="{Binding Instances}" SelectedItem="{Binding SelectedInstance}"
-                                      MinWidth="280" FontSize="14" HorizontalAlignment="Left">
+                                      MinWidth="300" FontSize="14" HorizontalAlignment="Stretch">
                                 <ComboBox.ItemTemplate>
                                     <DataTemplate>
                                         <StackPanel Orientation="Horizontal" Spacing="8">
                                             <TextBlock Text="★" FontSize="11" VerticalAlignment="Center"
+                                                       Foreground="{DynamicResource AccentBrush}"
                                                        IsVisible="{Binding IsFavorite}"/>
                                             <TextBlock Text="{Binding Name}" FontWeight="SemiBold"/>
                                             <TextBlock Text="{Binding VersionId}" FontSize="11" Opacity="0.6"
@@ -30,18 +33,21 @@
                                     </DataTemplate>
                                 </ComboBox.ItemTemplate>
                             </ComboBox>
-                            <StackPanel Orientation="Horizontal" Spacing="10" Margin="0,2,0,0">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
                                 <TextBox Text="{Binding OfflineUsername}" Watermark="{loc:Loc 'home.offline_username'}"
-                                         MinWidth="170" FontSize="12" Padding="6,4"/>
-                                <Button Content="＋ {loc:Loc 'home.new_instance'}" Command="{Binding OpenNewInstanceWizardCommand}"
-                                        Classes="small" FontSize="12"/>
+                                         Width="180" FontSize="12"/>
+                                <Button Content="{loc:Loc 'home.new_instance'}" Command="{Binding OpenNewInstanceWizardCommand}"
+                                        Classes="small"/>
                             </StackPanel>
                         </StackPanel>
+                        <!-- Win11 primary button: system accent, white label -->
                         <Button Grid.Column="1" Content="{loc:Loc 'home.launch'}" Command="{Binding LaunchCommand}"
                                 IsEnabled="{Binding !IsBusy}"
-                                FontSize="16" FontWeight="Bold"
-                                Background="{DynamicResource SuccessBrush}" Foreground="White"
-                                CornerRadius="6" Width="150" Height="54"
+                                FontSize="15" FontWeight="SemiBold"
+                                Background="{DynamicResource AccentBrush}"
+                                BorderBrush="{DynamicResource AccentHoverBrush}" BorderThickness="1"
+                                Foreground="White"
+                                CornerRadius="4" Width="160" Height="52"
                                 VerticalAlignment="Center"/>
                     </Grid>
                 </Border>
@@ -237,7 +243,7 @@
                     <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Right" Margin="0,8,0,0">
                         <Button Content="{loc:Loc 'common.cancel'}" Command="{Binding CancelNewInstanceWizardCommand}" Classes="small"/>
                         <Button Content="{loc:Loc 'home.create_install'}" Command="{Binding CreateNewInstanceCommand}"
-                                Background="{DynamicResource SuccessBrush}" Foreground="White" Padding="14,5"/>
+                                Background="{DynamicResource AccentBrush}" Foreground="White" Padding="14,5"/>
                     </StackPanel>
                 </StackPanel>
             </Border>

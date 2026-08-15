@@ -5,85 +5,107 @@
         xmlns:loc="using:NML.App.Localization"
         xmlns:vm="using:NML.App.ViewModels"
         xmlns:v="using:NML.App.Views"
-        mc:Ignorable="d" d:DesignWidth="1080" d:DesignHeight="640"
+        mc:Ignorable="d" d:DesignWidth="1080" d:DesignHeight="680"
         x:Class="NML.App.Views.MainWindow"
         x:Name="Shell"
         Title="Next Minecraft Launcher"
-        Width="1080" Height="640" MinWidth="860" MinHeight="540"
+        Width="1080" Height="680" MinWidth="880" MinHeight="560"
         WindowStartupLocation="CenterScreen"
         FlowDirection="{Binding WindowFlowDirection}"
-        ExtendClientAreaToDecorationsHint="True"
-        ExtendClientAreaChromeHints="NoChrome"
-        ExtendClientAreaTitleBarHeightHint="-1"
-        Background="{DynamicResource SurfaceAltBrush}">
+        Background="{DynamicResource SurfaceBrush}">
 
     <Window.Resources>
-        <!-- Enables the "selected nav item" visual: true when the current item equals the shell's
-             CurrentPage. Bound to Button.Classes for the nav selected highlight. -->
+        <!-- true when the nav item is the current page (drives the selected style). -->
         <v:NavActiveClassConverter x:Key="NavActiveConverter"/>
     </Window.Resources>
 
-    <Grid RowDefinitions="Auto,*">
+    <!-- Win11 NavigationView-style grid: labeled sidebar + content -->
+    <Grid ColumnDefinitions="190,*">
 
-        <!-- Custom title bar (drag area + window controls) -->
-        <Border x:Name="TitleBar" Grid.Row="0" Background="{DynamicResource SurfaceBrush}" Height="36"
-                PointerPressed="TitleBar_PointerPressed">
-            <Grid ColumnDefinitions="*,Auto">
-                <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="8" Margin="12,0" VerticalAlignment="Center">
-                    <TextBlock Text="{loc:Loc 'app.title'}" FontSize="12" FontWeight="SemiBold"
-                               Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center"/>
+        <!-- ===== SIDEBAR (Win11 nav: pill + left accent indicator on selection) ===== -->
+        <Border Grid.Column="0" Background="{DynamicResource SurfaceAltBrush}">
+            <DockPanel>
+
+                <!-- App identity -->
+                <StackPanel DockPanel.Dock="Top" Margin="16,18,16,14" Spacing="4">
+                    <TextBlock Text="Minecraft" FontSize="15" FontWeight="SemiBold"
+                               Foreground="{DynamicResource TextPrimaryBrush}"/>
+                    <TextBlock Text="Launcher" FontSize="11"
+                               Foreground="{DynamicResource TextSecondaryBrush}"/>
                 </StackPanel>
-                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="2" Margin="0,0,4,0" VerticalAlignment="Center">
-                    <Button Click="Minimize_Click" Content="—" Width="40" Height="32" Classes="titleBtn"/>
-                    <Button Click="Maximize_Click" Content="▢" Width="40" Height="32" Classes="titleBtn"/>
-                    <Button Click="Close_Click" Content="✕" Width="40" Height="32" Classes="titleBtnClose"/>
-                </StackPanel>
-            </Grid>
-        </Border>
 
-        <!-- HMCL-style layout: labeled text sidebar + content area -->
-        <Grid Grid.Row="1" ColumnDefinitions="150,*">
-
-            <!-- Sidebar: icon + text label per page (HMCL's left nav), flat selected fill -->
-            <Border Grid.Column="0" Background="{DynamicResource SurfaceBrush}">
+                <!-- Nav items -->
                 <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
-                    <ItemsControl ItemsSource="{Binding Pages}" Padding="8,10">
+                    <ItemsControl ItemsSource="{Binding Pages}" Padding="10,0,10,12">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
-                                <Button Classes="nav" CornerRadius="4"
-                                        Width="134" Height="34"
-                                        Padding="10,0" Margin="0,1"
-                                        HorizontalAlignment="Left"
-                                        BorderThickness="0"
-                                        Foreground="{DynamicResource TextPrimaryBrush}"
-                                        Command="{Binding #Shell.DataContext.NavigateToCommand}"
-                                        CommandParameter="{Binding}"
-                                        ToolTip.Tip="{Binding LocalizedTitle}">
-                                    <Classes.active>
-                                        <MultiBinding Converter="{StaticResource NavActiveConverter}">
-                                            <Binding Path="DataContext.CurrentPage" ElementName="Shell"/>
-                                            <Binding/>
-                                        </MultiBinding>
-                                    </Classes.active>
-                                    <StackPanel Orientation="Horizontal" Spacing="8">
-                                        <TextBlock Text="{Binding Icon}" FontSize="13" VerticalAlignment="Center"/>
-                                        <TextBlock Text="{Binding LocalizedTitle}" FontSize="12.5"
-                                                   VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
-                                    </StackPanel>
-                                </Button>
+                                <Grid Margin="0,1">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="3"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <!-- Selected indicator: vertical accent bar (Win11 style) -->
+                                    <Border Grid.Column="0" Width="3" CornerRadius="2" Margin="0,4"
+                                            VerticalAlignment="Stretch"
+                                            Background="{DynamicResource AccentBrush}">
+                                        <Border.IsVisible>
+                                            <MultiBinding Converter="{StaticResource NavActiveConverter}">
+                                                <Binding Path="DataContext.CurrentPage" ElementName="Shell"/>
+                                                <Binding/>
+                                            </MultiBinding>
+                                        </Border.IsVisible>
+                                    </Border>
+
+                                    <Button Grid.Column="1" Classes="nav" CornerRadius="4"
+                                            Height="36" Margin="4,0,0,0"
+                                            Padding="12,0"
+                                            HorizontalContentAlignment="Left"
+                                            BorderThickness="0"
+                                            Foreground="{DynamicResource TextPrimaryBrush}"
+                                            Command="{Binding #Shell.DataContext.NavigateToCommand}"
+                                            CommandParameter="{Binding}"
+                                            ToolTip.Tip="{Binding LocalizedTitle}">
+                                        <Classes.active>
+                                            <MultiBinding Converter="{StaticResource NavActiveConverter}">
+                                                <Binding Path="DataContext.CurrentPage" ElementName="Shell"/>
+                                                <Binding/>
+                                            </MultiBinding>
+                                        </Classes.active>
+                                        <StackPanel Orientation="Horizontal" Spacing="10">
+                                            <TextBlock Text="{Binding Icon}" FontSize="13" VerticalAlignment="Center"
+                                                       Foreground="{DynamicResource AccentBrush}"/>
+                                            <TextBlock Text="{Binding LocalizedTitle}" FontSize="13"
+                                                       VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+                                        </StackPanel>
+                                    </Button>
+                                </Grid>
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
                 </ScrollViewer>
+            </DockPanel>
+        </Border>
+
+        <!-- ===== CONTENT: 48px page header (title + accent underline) + page ===== -->
+        <DockPanel Grid.Column="1" Background="{DynamicResource SurfaceBrush}">
+
+            <Border DockPanel.Dock="Top" Height="48" Padding="28,0" VerticalAlignment="Center"
+                    BorderBrush="{DynamicResource CardStrokeBrush}" BorderThickness="0,0,0,1">
+                <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
+                    <TextBlock Text="{Binding CurrentPage.Icon}" FontSize="15" VerticalAlignment="Center"
+                               Foreground="{DynamicResource AccentBrush}"/>
+                    <TextBlock Text="{Binding CurrentPage.LocalizedTitle}" FontSize="17" FontWeight="SemiBold"
+                               VerticalAlignment="Center" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                </StackPanel>
             </Border>
 
-            <!-- Content area: the active page view (instant switch, no slide animation) -->
-            <ContentControl Content="{Binding CurrentPage}" Grid.Column="1"/>
-        </Grid>
+            <ContentControl Content="{Binding CurrentPage}"/>
+        </DockPanel>
     </Grid>
 
     <Window.Styles>
-        <!-- Nav button base: flat, transparent until hover/selected. -->
+        <!-- Nav item: subtle hover pill; selected = filled pill (accent indicator is separate). -->
         <Style Selector="Button.nav">
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="HorizontalContentAlignment" Value="Left"/>
@@ -95,44 +117,33 @@
         <Style Selector="Button.nav:pointerover /template/ ContentPresenter">
             <Setter Property="Background" Value="{DynamicResource NavHoverBrush}"/>
         </Style>
-        <!-- Selected: flat light fill (HMCL look) + keep text color. -->
         <Style Selector="Button.nav.active /template/ ContentPresenter">
             <Setter Property="Background" Value="{DynamicResource NavActiveBrush}"/>
         </Style>
         <Style Selector="Button.nav.active:pointerover /template/ ContentPresenter">
             <Setter Property="Background" Value="{DynamicResource NavActiveBrush}"/>
         </Style>
-        <!-- Title-bar buttons. -->
-        <Style Selector="Button.titleBtn">
-            <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
-            <Setter Property="CornerRadius" Value="0"/>
-            <Setter Property="Padding" Value="0"/>
+        <!-- Standard textbox: Win11 bottom-stroke look -->
+        <Style Selector="TextBox">
+            <Setter Property="CornerRadius" Value="4"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource ControlStrokeBrush}"/>
+            <Setter Property="Background" Value="{DynamicResource PanelAltBrush}"/>
         </Style>
-        <Style Selector="Button.titleBtn /template/ ContentPresenter">
-            <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="CornerRadius" Value="0"/>
+        <Style Selector="TextBox:focus">
+            <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}"/>
         </Style>
-        <Style Selector="Button.titleBtn:pointerover /template/ ContentPresenter">
-            <Setter Property="Background" Value="{DynamicResource NavHoverBrush}"/>
+        <!-- ComboBox: match textbox chrome -->
+        <Style Selector="ComboBox">
+            <Setter Property="CornerRadius" Value="4"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource ControlStrokeBrush}"/>
+            <Setter Property="Background" Value="{DynamicResource PanelAltBrush}"/>
         </Style>
-        <Style Selector="Button.titleBtnClose">
-            <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
-            <Setter Property="CornerRadius" Value="0"/>
-            <Setter Property="Padding" Value="0"/>
-        </Style>
-        <Style Selector="Button.titleBtnClose /template/ ContentPresenter">
-            <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="CornerRadius" Value="0"/>
-        </Style>
-        <Style Selector="Button.titleBtnClose:pointerover /template/ ContentPresenter">
-            <Setter Property="Background" Value="{DynamicResource DangerBrush}"/>
-        </Style>
-        <Style Selector="Button.titleBtnClose:pointerover">
-            <Setter Property="Foreground" Value="White"/>
+        <!-- Default Button (accent style, Win11 primary): only affects buttons that don't
+             set their own background. -->
+        <Style Selector="Button">
+            <Setter Property="CornerRadius" Value="4"/>
         </Style>
     </Window.Styles>
 </Window>

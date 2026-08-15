@@ -1,44 +1,55 @@
 <Styles xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-    <!-- Unified button styles: defined once here, used across all pages -->
+    <!-- Windows 11 / Fluent 2 control styling -->
 
-    <!-- Small button: flat, compact, for toolbar/inline actions -->
+    <!-- Small button: secondary Win11 style — subtle fill + 1px stroke, 4px radius -->
     <Style Selector="Button.small">
-        <Setter Property="Padding" Value="10,3"/>
+        <Setter Property="Padding" Value="12,4"/>
         <Setter Property="FontSize" Value="12"/>
         <Setter Property="CornerRadius" Value="4"/>
         <Setter Property="Background" Value="{DynamicResource SmallButtonBgBrush}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource ControlStrokeBrush}"/>
+        <Setter Property="BorderThickness" Value="1"/>
         <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
     </Style>
     <Style Selector="Button.small:pointerover /template/ ContentPresenter">
         <Setter Property="Background" Value="{DynamicResource SmallButtonHoverBgBrush}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource ControlStrokeBrush}"/>
+    </Style>
+    <Style Selector="Button.small:pressed /template/ ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource NavActiveBrush}"/>
     </Style>
 
-    <!-- Small danger button: red variant of small -->
+    <!-- Small danger button: Win11 red -->
     <Style Selector="Button.small.danger">
         <Setter Property="Background" Value="{DynamicResource DangerButtonBgBrush}"/>
+        <Setter Property="BorderBrush" Value="Transparent"/>
         <Setter Property="Foreground" Value="White"/>
     </Style>
     <Style Selector="Button.small.danger:pointerover /template/ ContentPresenter">
-        <Setter Property="Background" Value="{DynamicResource DangerBrush}"/>
+        <Setter Property="Background" Value="#FFD13438"/>
     </Style>
 
-    <!-- Tab button: sidebar-style nav buttons -->
+    <!-- Tab button: subtle secondary (used by content-page tab strips) -->
     <Style Selector="Button.tabbtn">
         <Setter Property="Padding" Value="12,5"/>
         <Setter Property="FontSize" Value="12"/>
         <Setter Property="CornerRadius" Value="4"/>
         <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource ControlStrokeBrush}"/>
+        <Setter Property="BorderThickness" Value="1"/>
         <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
     </Style>
     <Style Selector="Button.tabbtn:pointerover /template/ ContentPresenter">
-        <Setter Property="Background" Value="{DynamicResource SmallButtonBgBrush}"/>
+        <Setter Property="Background" Value="{DynamicResource NavHoverBrush}"/>
     </Style>
 
-    <!-- Card surface: used for world/screenshot/resource-pack cards -->
+    <!-- Card surface: Win11 layered card with 1px stroke + 8px radius -->
     <Style Selector="Border.card">
         <Setter Property="Background" Value="{DynamicResource PanelBrush}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource CardStrokeBrush}"/>
+        <Setter Property="BorderThickness" Value="1"/>
         <Setter Property="CornerRadius" Value="8"/>
-        <Setter Property="Padding" Value="10"/>
+        <Setter Property="Padding" Value="12"/>
         <Setter Property="Margin" Value="0,0,8,8"/>
     </Style>
 </Styles>

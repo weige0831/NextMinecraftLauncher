@@ -5,46 +5,51 @@
 
     <Application.Resources>
         <ResourceDictionary>
-            <!-- Variant-scoped design tokens (HMCL-style flat, opaque palette — no translucency,
-                 no backdrop effects; the theme toggle just swaps solid colors). Accent/Success/
-                 Danger are shared across variants (accent is user-overridable at runtime). -->
+            <!-- Windows 11 / Fluent 2 design tokens. Layered surfaces on a Mica-toned base,
+                1px card strokes, and the Windows system accent (#0078D4). Light palette mirrors
+                Win11 light (#F3F3F3 mica, white cards); dark mirrors Win11 dark (#202020 mica,
+                #272727 cards). -->
             <ResourceDictionary.ThemeDictionaries>
-                <!-- DARK (default): flat dark grays like HMCL's dark theme. -->
+                <!-- DARK (default): Win11 dark-mode layers. -->
                 <ResourceDictionary x:Key="Dark">
-                    <SolidColorBrush x:Key="SurfaceBrush" Color="#FF1E1E22"/>
-                    <SolidColorBrush x:Key="SurfaceAltBrush" Color="#FF25252A"/>
-                    <SolidColorBrush x:Key="PanelBrush" Color="#FF2A2A30"/>
-                    <SolidColorBrush x:Key="PanelAltBrush" Color="#FF303036"/>
-                    <SolidColorBrush x:Key="TextPrimaryBrush" Color="#FFE6E6E8"/>
-                    <SolidColorBrush x:Key="TextSecondaryBrush" Color="#FFA8A8AE"/>
-                    <SolidColorBrush x:Key="TextMutedBrush" Color="#FF707078"/>
-                    <!-- Nav: flat hover + a light selected fill (HMCL's selected item look). -->
-                    <SolidColorBrush x:Key="NavHoverBrush" Color="#FF33333A"/>
-                    <SolidColorBrush x:Key="NavActiveBrush" Color="#FF3E3E46"/>
-                    <SolidColorBrush x:Key="SmallButtonBgBrush" Color="#FF3A3A42"/>
-                    <SolidColorBrush x:Key="SmallButtonHoverBgBrush" Color="#FF46464F"/>
-                    <SolidColorBrush x:Key="DangerButtonBgBrush" Color="#FFB23B3B"/>
+                    <SolidColorBrush x:Key="SurfaceBrush" Color="#FF202020"/>
+                    <SolidColorBrush x:Key="SurfaceAltBrush" Color="#FF272727"/>
+                    <SolidColorBrush x:Key="PanelBrush" Color="#FF2B2B2B"/>
+                    <SolidColorBrush x:Key="PanelAltBrush" Color="#FF333333"/>
+                    <SolidColorBrush x:Key="CardStrokeBrush" Color="#33FFFFFF"/>
+                    <SolidColorBrush x:Key="ControlStrokeBrush" Color="#38FFFFFF"/>
+                    <SolidColorBrush x:Key="TextPrimaryBrush" Color="#FFFFFFFF"/>
+                    <SolidColorBrush x:Key="TextSecondaryBrush" Color="#FFC8C8C8"/>
+                    <SolidColorBrush x:Key="TextMutedBrush" Color="#FF9A9A9A"/>
+                    <SolidColorBrush x:Key="NavHoverBrush" Color="#1AFFFFFF"/>
+                    <SolidColorBrush x:Key="NavActiveBrush" Color="#FF3A3A3A"/>
+                    <SolidColorBrush x:Key="SmallButtonBgBrush" Color="#FF3B3B3B"/>
+                    <SolidColorBrush x:Key="SmallButtonHoverBgBrush" Color="#FF454545"/>
+                    <SolidColorBrush x:Key="DangerButtonBgBrush" Color="#FFC42B1C"/>
                 </ResourceDictionary>
-                <!-- LIGHT: flat light grays + dark text. -->
+                <!-- LIGHT: Win11 light-mode layers. -->
                 <ResourceDictionary x:Key="Light">
-                    <SolidColorBrush x:Key="SurfaceBrush" Color="#FFF3F3F5"/>
-                    <SolidColorBrush x:Key="SurfaceAltBrush" Color="#FFEAEAEC"/>
+                    <SolidColorBrush x:Key="SurfaceBrush" Color="#FFF3F3F3"/>
+                    <SolidColorBrush x:Key="SurfaceAltBrush" Color="#FFEBEBEB"/>
                     <SolidColorBrush x:Key="PanelBrush" Color="#FFFFFFFF"/>
-                    <SolidColorBrush x:Key="PanelAltBrush" Color="#FFF6F6F8"/>
-                    <SolidColorBrush x:Key="TextPrimaryBrush" Color="#FF1F1F23"/>
-                    <SolidColorBrush x:Key="TextSecondaryBrush" Color="#FF5A5A62"/>
-                    <SolidColorBrush x:Key="TextMutedBrush" Color="#FF8A8A92"/>
-                    <SolidColorBrush x:Key="NavHoverBrush" Color="#FFE2E2E6"/>
-                    <SolidColorBrush x:Key="NavActiveBrush" Color="#FFD8D8DE"/>
-                    <SolidColorBrush x:Key="SmallButtonBgBrush" Color="#FFE4E4E8"/>
-                    <SolidColorBrush x:Key="SmallButtonHoverBgBrush" Color="#FFD6D6DC"/>
-                    <SolidColorBrush x:Key="DangerButtonBgBrush" Color="#FFC03030"/>
+                    <SolidColorBrush x:Key="PanelAltBrush" Color="#FFFBFBFB"/>
+                    <SolidColorBrush x:Key="CardStrokeBrush" Color="#22000000"/>
+                    <SolidColorBrush x:Key="ControlStrokeBrush" Color="#2B000000"/>
+                    <SolidColorBrush x:Key="TextPrimaryBrush" Color="#FF1A1A1A"/>
+                    <SolidColorBrush x:Key="TextSecondaryBrush" Color="#FF5C5C5C"/>
+                    <SolidColorBrush x:Key="TextMutedBrush" Color="#FF8A8A8A"/>
+                    <SolidColorBrush x:Key="NavHoverBrush" Color="#12000000"/>
+                    <SolidColorBrush x:Key="NavActiveBrush" Color="#FFE6E6E6"/>
+                    <SolidColorBrush x:Key="SmallButtonBgBrush" Color="#FFFDFDFD"/>
+                    <SolidColorBrush x:Key="SmallButtonHoverBgBrush" Color="#FFF0F0F0"/>
+                    <SolidColorBrush x:Key="DangerButtonBgBrush" Color="#FFC42B1C"/>
                 </ResourceDictionary>
             </ResourceDictionary.ThemeDictionaries>
-            <!-- Shared across variants (accent is overridden live by SettingsPageViewModel). -->
-            <SolidColorBrush x:Key="AccentBrush" Color="#FF3498DB"/>
-            <SolidColorBrush x:Key="SuccessBrush" Color="#FF3F9E4F"/>
-            <SolidColorBrush x:Key="DangerBrush" Color="#FFE04B4B"/>
+            <!-- Windows system accent + semantic colors (accent overridable from Settings). -->
+            <SolidColorBrush x:Key="AccentBrush" Color="#FF0078D4"/>
+            <SolidColorBrush x:Key="AccentHoverBrush" Color="#FF1A86D9"/>
+            <SolidColorBrush x:Key="SuccessBrush" Color="#FF0F7B0F"/>
+            <SolidColorBrush x:Key="DangerBrush" Color="#FFC42B1C"/>
         </ResourceDictionary>
     </Application.Resources>
 
