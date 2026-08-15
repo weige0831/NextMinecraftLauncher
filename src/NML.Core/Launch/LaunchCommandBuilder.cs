@@ -200,10 +200,15 @@ public sealed class LaunchCommandBuilder
             if (!RuleEvaluator.IsAllowed(lib.Rules, _ruleCtx)) continue;
 
             Downloadable? artifact = lib.Downloads?.Artifact;
-            if (artifact is null) continue;
-
-            string rel = artifact.Path ?? lib.Coordinate.RelativePath;
-            parts.Add(options.Mc.LibraryPath(rel));
+            if (artifact is not null)
+            {
+                string rel = artifact.Path ?? lib.Coordinate.RelativePath;
+                parts.Add(options.Mc.LibraryPath(rel));
+            }
+            else if (lib.Natives is null && !string.IsNullOrEmpty(lib.Name))
+            {
+                parts.Add(options.Mc.LibraryPath(lib.Coordinate.RelativePath));
+            }
         }
 
         return string.Join(Path.PathSeparator, parts);

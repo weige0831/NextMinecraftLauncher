@@ -32,11 +32,12 @@ public sealed class LocalModelProbe
     public async Task<IReadOnlyList<ChatProviderConfig>> DetectAsync(CancellationToken ct = default)
     {
         var found = new List<ChatProviderConfig>();
-        using var cts = CancellationTokenSource.CreateLinkedTokenSource(ct);
-        cts.CancelAfter(TimeSpan.FromSeconds(2));
 
         foreach ((string name, string baseUrl, ChatProviderKind kind) in Candidates)
         {
+            using var cts = CancellationTokenSource.CreateLinkedTokenSource(ct);
+            cts.CancelAfter(TimeSpan.FromSeconds(2));
+
             try
             {
                 // The OpenAI-compatible /models endpoint lists available models.

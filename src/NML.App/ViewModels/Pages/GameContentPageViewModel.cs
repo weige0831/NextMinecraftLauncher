@@ -171,7 +171,7 @@ public partial class GameContentPageViewModel : PageViewModelBase
         {
             Instance? inst = GetActiveInstance();
             if (inst is null) { LogContent = "content.empty"; return; }
-            var browser = new GameContentBrowser(new MinecraftDirectory(_instances.GameDirFor(inst.Name)));
+            var browser = new GameContentBrowser(new MinecraftDirectory(_instances.GameDirFor(inst)));
             string raw = await Task.Run(() => browser.ReadLatestLog());
             LogContent = string.IsNullOrEmpty(raw) ? "content.empty" : raw;
             // Classify every line once; the filter rebuild is cheap relative to the I/O.
@@ -235,7 +235,7 @@ public partial class GameContentPageViewModel : PageViewModelBase
         {
             Instance? inst = GetActiveInstance();
             if (inst is null) return;
-            var browser = new GameContentBrowser(new MinecraftDirectory(_instances.GameDirFor(inst.Name)));
+            var browser = new GameContentBrowser(new MinecraftDirectory(_instances.GameDirFor(inst)));
             int count = browser.EnableAllMods();
             Status = $"mods.enabled_all,{count}";
             Refresh();
@@ -250,7 +250,7 @@ public partial class GameContentPageViewModel : PageViewModelBase
         {
             Instance? inst = GetActiveInstance();
             if (inst is null) return;
-            var browser = new GameContentBrowser(new MinecraftDirectory(_instances.GameDirFor(inst.Name)));
+            var browser = new GameContentBrowser(new MinecraftDirectory(_instances.GameDirFor(inst)));
             int count = browser.DisableAllMods();
             Status = $"mods.disabled_all,{count}";
             Refresh();
@@ -265,7 +265,7 @@ public partial class GameContentPageViewModel : PageViewModelBase
         Instance? inst = GetActiveInstance();
         string root = inst is null
             ? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), ".minecraft")
-            : _instances.GameDirFor(inst.Name);
+            : _instances.GameDirFor(inst);
         var browser = new GameContentBrowser(new MinecraftDirectory(root));
 
         Items.Clear();
@@ -407,7 +407,7 @@ public partial class GameContentPageViewModel : PageViewModelBase
         {
             Instance? inst = GetActiveInstance();
             if (inst is null) return;
-            var browser = new GameContentBrowser(new MinecraftDirectory(_instances.GameDirFor(inst.Name)));
+            var browser = new GameContentBrowser(new MinecraftDirectory(_instances.GameDirFor(inst)));
             browser.ToggleMod(file.Path);
             Refresh();
         }
@@ -421,7 +421,7 @@ public partial class GameContentPageViewModel : PageViewModelBase
         {
             Instance? inst = GetActiveInstance();
             if (inst is null) return;
-            var browser = new GameContentBrowser(new MinecraftDirectory(_instances.GameDirFor(inst.Name)));
+            var browser = new GameContentBrowser(new MinecraftDirectory(_instances.GameDirFor(inst)));
             string zip = browser.BackupWorld(save.Path);
             Status = $"world.backup_done,{Path.GetFileName(zip)}";
         }
@@ -512,7 +512,7 @@ public partial class GameContentPageViewModel : PageViewModelBase
         {
             Instance? inst = GetActiveInstance();
             if (inst is null) return;
-            var browser = new GameContentBrowser(new MinecraftDirectory(_instances.GameDirFor(inst.Name)));
+            var browser = new GameContentBrowser(new MinecraftDirectory(_instances.GameDirFor(inst)));
             browser.RenameWorld(card.Path, newName);
             Refresh();
             Status = $"world.renamed,{newName}";
@@ -566,7 +566,7 @@ public partial class GameContentPageViewModel : PageViewModelBase
         {
             Instance? inst = GetActiveInstance();
             if (inst is null) return;
-            var browser = new GameContentBrowser(new MinecraftDirectory(_instances.GameDirFor(inst.Name)));
+            var browser = new GameContentBrowser(new MinecraftDirectory(_instances.GameDirFor(inst)));
             IsRestoring = true;
             RestoreProgress = 0;
             Status = "backup.restore.restoring";
@@ -617,7 +617,7 @@ public partial class GameContentPageViewModel : PageViewModelBase
         {
             Instance? inst = GetActiveInstance();
             if (inst is null) return;
-            var browser = new GameContentBrowser(new MinecraftDirectory(_instances.GameDirFor(inst.Name)));
+            var browser = new GameContentBrowser(new MinecraftDirectory(_instances.GameDirFor(inst)));
             browser.DeleteBackup(backup.Path);
             Refresh();
         }
@@ -631,7 +631,7 @@ public partial class GameContentPageViewModel : PageViewModelBase
         {
             Instance? inst = GetActiveInstance();
             if (inst is null) return;
-            var browser = new GameContentBrowser(new MinecraftDirectory(_instances.GameDirFor(inst.Name)));
+            var browser = new GameContentBrowser(new MinecraftDirectory(_instances.GameDirFor(inst)));
             string desktop = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
             string zipPath = Path.Combine(desktop, $"{save.Name}.zip");
             browser.ExportWorld(save.Path, zipPath);
@@ -671,7 +671,7 @@ public partial class GameContentPageViewModel : PageViewModelBase
         {
             Instance? inst = GetActiveInstance();
             if (inst is null) return;
-            var browser = new GameContentBrowser(new MinecraftDirectory(_instances.GameDirFor(inst.Name)));
+            var browser = new GameContentBrowser(new MinecraftDirectory(_instances.GameDirFor(inst)));
             string worldDir = browser.ImportWorld(zipPath);
             Status = $"home.installed,{Path.GetFileName(worldDir)}";
             Refresh();
@@ -686,7 +686,7 @@ public partial class GameContentPageViewModel : PageViewModelBase
         {
             Instance? inst = GetActiveInstance();
             if (inst is null) return;
-            var browser = new GameContentBrowser(new MinecraftDirectory(_instances.GameDirFor(inst.Name)));
+            var browser = new GameContentBrowser(new MinecraftDirectory(_instances.GameDirFor(inst)));
             browser.DeleteWorld(save.Path);
             Refresh();
         }
@@ -700,7 +700,7 @@ public partial class GameContentPageViewModel : PageViewModelBase
         {
             Instance? inst = GetActiveInstance();
             if (inst is null) return;
-            var browser = new GameContentBrowser(new MinecraftDirectory(_instances.GameDirFor(inst.Name)));
+            var browser = new GameContentBrowser(new MinecraftDirectory(_instances.GameDirFor(inst)));
             browser.DeleteScreenshot(file.Path);
             Refresh();
         }
@@ -714,7 +714,7 @@ public partial class GameContentPageViewModel : PageViewModelBase
         {
             Instance? inst = GetActiveInstance();
             if (inst is null) return;
-            var browser = new GameContentBrowser(new MinecraftDirectory(_instances.GameDirFor(inst.Name)));
+            var browser = new GameContentBrowser(new MinecraftDirectory(_instances.GameDirFor(inst)));
             browser.OpenScreenshot(file.Path);
         }
         catch (Exception ex) { Status = $"common.error,{ex.Message}"; }
@@ -770,7 +770,7 @@ public partial class GameContentPageViewModel : PageViewModelBase
 
     /// <summary>Bundle every selected screenshot into a timestamped .zip on the desktop.</summary>
     [RelayCommand]
-    private void ExportSelectedScreensshots()
+    private void ExportSelectedScreenshots()
     {
         try
         {
@@ -778,7 +778,7 @@ public partial class GameContentPageViewModel : PageViewModelBase
             if (inst is null) return;
             var selected = ScreenshotCards.Where(c => c.IsSelected).ToList();
             if (selected.Count == 0) { Status = "screenshot.none_selected"; return; }
-            var browser = new GameContentBrowser(new MinecraftDirectory(_instances.GameDirFor(inst.Name)));
+            var browser = new GameContentBrowser(new MinecraftDirectory(_instances.GameDirFor(inst)));
             string desktop = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
             string stamp = DateTime.Now.ToString("yyyyMMdd-HHmmss");
             string zip = Path.Combine(desktop, $"screenshots-{stamp}.zip");
@@ -802,7 +802,7 @@ public partial class GameContentPageViewModel : PageViewModelBase
         {
             Instance? inst = GetActiveInstance();
             if (inst is null) return;
-            var browser = new GameContentBrowser(new MinecraftDirectory(_instances.GameDirFor(inst.Name)));
+            var browser = new GameContentBrowser(new MinecraftDirectory(_instances.GameDirFor(inst)));
             browser.DeleteResourcePack(file.Path);
             Refresh();
         }
@@ -817,7 +817,7 @@ public partial class GameContentPageViewModel : PageViewModelBase
         {
             Instance? inst = GetActiveInstance();
             if (inst is null) return;
-            string optionsPath = Path.Combine(_instances.GameDirFor(inst.Name), "options.txt");
+            string optionsPath = Path.Combine(_instances.GameDirFor(inst), "options.txt");
             string optionsTxt = File.Exists(optionsPath) ? File.ReadAllText(optionsPath) : string.Empty;
             var (newOptions, nowEnabled) = ResourcePackStateManager.Toggle(optionsTxt, card.Name);
             File.WriteAllText(optionsPath, newOptions);
@@ -853,7 +853,7 @@ public partial class GameContentPageViewModel : PageViewModelBase
             if (inst is null) return;
             _selectedConfigFile = file;
             SelectedConfigName = file.Name;
-            var browser = new GameContentBrowser(new MinecraftDirectory(_instances.GameDirFor(inst.Name)));
+            var browser = new GameContentBrowser(new MinecraftDirectory(_instances.GameDirFor(inst)));
             string content = browser.ReadConfigFile(file.Path);
             ConfigContent = content;
 
@@ -878,7 +878,7 @@ public partial class GameContentPageViewModel : PageViewModelBase
             if (_selectedConfigFile is null) return;
             Instance? inst = GetActiveInstance();
             if (inst is null) return;
-            var browser = new GameContentBrowser(new MinecraftDirectory(_instances.GameDirFor(inst.Name)));
+            var browser = new GameContentBrowser(new MinecraftDirectory(_instances.GameDirFor(inst)));
             // When the per-row editor is active, serialize the (possibly edited) rows back; the
             // plain-text editor otherwise writes ConfigContent verbatim.
             string toWrite = IsStructuredConfig
@@ -896,7 +896,7 @@ public partial class GameContentPageViewModel : PageViewModelBase
         Instance? inst = GetActiveInstance();
         string root = inst is null
             ? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), ".minecraft")
-            : _instances.GameDirFor(inst.Name);
+            : _instances.GameDirFor(inst);
         string target = Tab == "saves" ? Path.Combine(root, "saves")
                       : Tab == "screenshots" ? Path.Combine(root, "screenshots")
                       : Tab == "resourcepacks" ? Path.Combine(root, "resourcepacks")
@@ -921,7 +921,7 @@ public partial class GameContentPageViewModel : PageViewModelBase
 
         try
         {
-            string modsDir = Path.Combine(_instances.GameDirFor(inst.Name), "mods");
+            string modsDir = Path.Combine(_instances.GameDirFor(inst), "mods");
             var installed = ModVersionChecker.ScanInstalledMods(modsDir);
 
             foreach (var mod in installed)
@@ -978,7 +978,7 @@ public partial class GameContentPageViewModel : PageViewModelBase
         Instance? inst = GetActiveInstance();
         if (inst is null) { Status = "mods.no_instance"; return; }
 
-        string modsDir = Path.Combine(_instances.GameDirFor(inst.Name), "mods");
+        string modsDir = Path.Combine(_instances.GameDirFor(inst), "mods");
         var plan = ModUpdatePlanner.Plan(InstalledMods, modsDir);
         if (plan.Count == 0) { Status = "mods.upgrade.none"; return; }
 

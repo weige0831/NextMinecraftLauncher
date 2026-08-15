@@ -74,12 +74,35 @@ public partial class HomePageViewModel : PageViewModelBase
     }
 
     public ObservableCollection<Instance> Instances { get; } = new();
+    public ObservableCollection<string> AvailableVersions { get; } = new();
 
     [ObservableProperty] private Instance? _selectedInstance;
     [ObservableProperty] private string _status;
     [ObservableProperty] private string _offlineUsername = "Player";
     [ObservableProperty] private bool _isBusy;
     [ObservableProperty] private int _installProgressPercent;
+
+    /// <summary>Fetch/refresh the version list from the manifest.</summary>
+    [RelayCommand]
+    private async Task RefreshVersionsAsync()
+    {
+        IsBusy = true;
+        Status = "home.status_fetching";
+        try
+        {
+            VersionManifest m = await _manifest.GetAsync(forceRefresh: true);
+            AvailableVersions.Clear();
+            foreach (VersionManifestEntry v in m.Versions)
+                AvailableVersions.Add(v.Id);
+            Status = $"home.loaded_versions,{m.Versions.Count}";
+        }
+        catch (Exception ex)
+        {
+            Status = $"home.fetch_failed,{ex.Message}";
+            _logger.LogError(ex, "Failed to refresh versions.");
+        }
+        finally { IsBusy = false; }
+    }
 
     // --- New instance wizard ---
     [ObservableProperty] private bool _showNewInstanceWizard;
@@ -354,8 +377,6 @@ public partial class HomePageViewModel : PageViewModelBase
         if (!IsInstanceOptionsDirty) IsInstanceOptionsDirty = true;
     }
 
-    /// <summary>
-    /// Persist the selected instance's edited launch options (memory, window size, JVM/game
     /// <summary>Toggle the selected instance's favorite/star state, persist, and re-sort.</summary>
     [RelayCommand]
     private void ToggleFavorite(Instance instance)
@@ -368,6 +389,8 @@ public partial class HomePageViewModel : PageViewModelBase
         ApplySort();
     }
 
+    /// <summary>
+    /// Persist the selected instance's edited launch options (memory, window size, JVM/game
     /// args) back to <c>instances.json</c>. Without this the in-memory edits would be lost on
     /// restart — the original launch-options panel mutated the model but never saved it.
     /// </summary>

@@ -86,8 +86,18 @@ public sealed class ModpackInstaller
             foreach (var f in files.EnumerateArray())
             {
                 string path = f.TryGetProperty("path", out var p) ? p.GetString() ?? "" : "";
-                var downloads = f.TryGetProperty("downloads", out var dl) && dl.ValueKind == JsonValueKind.Array
-                    ? dl.EnumerateArray().FirstOrDefault().GetString() ?? "" : "";
+                string downloads = string.Empty;
+                if (f.TryGetProperty("downloads", out var dl) && dl.ValueKind == JsonValueKind.Array)
+                {
+                    foreach (var d in dl.EnumerateArray())
+                    {
+                        if (d.ValueKind == JsonValueKind.String)
+                        {
+                            downloads = d.GetString() ?? string.Empty;
+                            break;
+                        }
+                    }
+                }
                 var hashes = f.TryGetProperty("hashes", out var h) ? h : default;
                 string sha1 = hashes.ValueKind == JsonValueKind.Object
                               && hashes.TryGetProperty("sha1", out var s1) ? s1.GetString() ?? "" : "";

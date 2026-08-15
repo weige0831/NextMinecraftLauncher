@@ -247,7 +247,7 @@ public static class WorldSettingsManager
         if (valueOffset < 0) return null;
         if (valueOffset + 2 > nbt.Length) return null;
         int valLen = (nbt[valueOffset] << 8) | nbt[valueOffset + 1];
-        if (valLen <= 0 || valueOffset + 2 + valLen > nbt.Length) return null;
+        if (valLen < 0 || valueOffset + 2 + valLen > nbt.Length) return null;
         return Encoding.UTF8.GetString(nbt, valueOffset + 2, valLen);
     }
 
@@ -336,7 +336,7 @@ public static class WorldSettingsManager
         if (valueOffset < 0 || valueOffset + 2 > nbt.Length) return nbt;
 
         int oldLen = (nbt[valueOffset] << 8) | nbt[valueOffset + 1];
-        if (oldLen <= 0 || valueOffset + 2 + oldLen > nbt.Length) return nbt;
+        if (oldLen < 0 || valueOffset + 2 + oldLen > nbt.Length) return nbt;
 
         byte[] newBytes = Encoding.UTF8.GetBytes(newValue);
         // Rebuild: [everything before the length prefix][new length][new bytes][everything after old value]

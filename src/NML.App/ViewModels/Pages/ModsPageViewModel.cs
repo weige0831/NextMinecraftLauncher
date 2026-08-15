@@ -118,7 +118,7 @@ public partial class ModsPageViewModel : PageViewModelBase
             return;
         }
 
-        string gameDir = _instances.GameDirFor(inst.Name);
+        string gameDir = _instances.GameDirFor(inst);
         string modsDir = System.IO.Path.Combine(gameDir, "mods");
         System.IO.Directory.CreateDirectory(modsDir);
 
@@ -131,7 +131,17 @@ public partial class ModsPageViewModel : PageViewModelBase
             IModCatalog catalog = SelectedSource == "CurseForge" && _curseForge is not null
                 ? _curseForge
                 : _catalog;
-            var files = await catalog.GetFilesAsync(mod.ProjectId, inst.VersionId, NML.Data.ModLoader.Fabric);
+            ModLoader loader = inst.Modloader?.ToLowerInvariant() switch
+            {
+                "fabric" => ModLoader.Fabric,
+                "forge" => ModLoader.Forge,
+                "quilt" => ModLoader.Quilt,
+                "neoforge" => ModLoader.NeoForge,
+                _ => ModLoader.Any,
+            };
+            var files = loader != ModLoader.Any
+                ? await catalog.GetFilesAsync(mod.ProjectId, inst.VersionId, loader)
+                : Array.Empty<ModFile>();
             if (files.Count == 0)
             {
                 files = await catalog.GetFilesAsync(mod.ProjectId, inst.VersionId, NML.Data.ModLoader.Any);

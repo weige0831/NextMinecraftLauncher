@@ -171,6 +171,7 @@ public partial class AccountsPageViewModel : PageViewModelBase
     /// <summary>Path where the user pastes the auth code from the browser redirect.</summary>
     [ObservableProperty] private string _msAuthCode = string.Empty;
 
+    [RelayCommand]
     private async Task AddMicrosoftAccountAsync()
     {
         await Task.CompletedTask; // browser open is synchronous, but keep the async signature for the command
