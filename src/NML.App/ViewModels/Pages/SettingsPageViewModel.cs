@@ -21,7 +21,7 @@ namespace NML.App.ViewModels.Pages;
 public partial class SettingsPageViewModel : PageViewModelBase
 {
     public override string TitleKey => "nav.settings";
-    public override string Icon => "⚙️";
+    public override string Icon => "⚙";
 
     private readonly SettingsStore _settings;
     private readonly LocalModelProbe _probe;

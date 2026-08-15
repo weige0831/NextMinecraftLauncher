@@ -5,73 +5,59 @@
         xmlns:loc="using:NML.App.Localization"
         xmlns:vm="using:NML.App.ViewModels"
         xmlns:v="using:NML.App.Views"
-        mc:Ignorable="d" d:DesignWidth="1100" d:DesignHeight="700"
+        mc:Ignorable="d" d:DesignWidth="1080" d:DesignHeight="640"
         x:Class="NML.App.Views.MainWindow"
         x:Name="Shell"
         Title="Next Minecraft Launcher"
-        Width="1100" Height="700" MinWidth="900" MinHeight="560"
+        Width="1080" Height="640" MinWidth="860" MinHeight="540"
         WindowStartupLocation="CenterScreen"
         FlowDirection="{Binding WindowFlowDirection}"
         ExtendClientAreaToDecorationsHint="True"
         ExtendClientAreaChromeHints="NoChrome"
         ExtendClientAreaTitleBarHeightHint="-1"
-        Background="Transparent">
+        Background="{DynamicResource SurfaceAltBrush}">
 
     <Window.Resources>
-        <!-- Enables the "selected nav item" visual: returns "nav active" when the current
-             item equals the shell's CurrentPage, otherwise "nav". Bound to Button.Classes. -->
+        <!-- Enables the "selected nav item" visual: true when the current item equals the shell's
+             CurrentPage. Bound to Button.Classes for the nav selected highlight. -->
         <v:NavActiveClassConverter x:Key="NavActiveConverter"/>
-        <!-- NavHoverBrush / NavActiveBrush are variant-scoped in App.axaml (light + dark palettes)
-             so the nav rail recolors with the theme. NavActiveHoverBrush is a shared accent tint. -->
-        <SolidColorBrush x:Key="NavActiveHoverBrush" Color="#4D4FC3F7"/>
     </Window.Resources>
 
-    <!-- Outer grid: background image layer + main content -->
-    <Grid>
-    <!-- Background image layer (PCL-style, behind everything) -->
-    <Image Source="{Binding BackgroundImagePath}" Stretch="UniformToFill"
-           IsVisible="{Binding HasBackground}" Opacity="0.35"/>
+    <Grid RowDefinitions="Auto,*">
 
-    <!-- Custom title bar (PCL-style) -->
-    <Grid RowDefinitions="Auto,*" Background="{x:Null}">
-        <Border x:Name="TitleBar" Grid.Row="0" Background="{DynamicResource SurfaceBrush}" Height="40"
+        <!-- Custom title bar (drag area + window controls) -->
+        <Border x:Name="TitleBar" Grid.Row="0" Background="{DynamicResource SurfaceBrush}" Height="36"
                 PointerPressed="TitleBar_PointerPressed">
             <Grid ColumnDefinitions="*,Auto">
-                <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="10" Margin="14,0" VerticalAlignment="Center">
-                    <TextBlock Text="🎮" FontSize="16" VerticalAlignment="Center"/>
-                    <TextBlock Text="{loc:Loc 'app.title'}" FontSize="13" FontWeight="SemiBold"
+                <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="8" Margin="12,0" VerticalAlignment="Center">
+                    <TextBlock Text="{loc:Loc 'app.title'}" FontSize="12" FontWeight="SemiBold"
                                Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center"/>
                 </StackPanel>
                 <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="2" Margin="0,0,4,0" VerticalAlignment="Center">
-                    <Button Click="Minimize_Click" Content="—" Width="36" Height="28" Classes="titleBtn"/>
-                    <Button Click="Maximize_Click" Content="▢" Width="36" Height="28" Classes="titleBtn"/>
-                    <Button Click="Close_Click" Content="✕" Width="36" Height="28" Classes="titleBtnClose"/>
+                    <Button Click="Minimize_Click" Content="—" Width="40" Height="32" Classes="titleBtn"/>
+                    <Button Click="Maximize_Click" Content="▢" Width="40" Height="32" Classes="titleBtn"/>
+                    <Button Click="Close_Click" Content="✕" Width="40" Height="32" Classes="titleBtnClose"/>
                 </StackPanel>
             </Grid>
         </Border>
 
-        <!-- HMCL-style layout: narrow icon-only nav rail + wide content area -->
-        <Grid Grid.Row="1" ColumnDefinitions="56,*">
+        <!-- HMCL-style layout: labeled text sidebar + content area -->
+        <Grid Grid.Row="1" ColumnDefinitions="150,*">
 
-            <!-- Icon-only sidebar (nav rail) -->
-            <Border Grid.Column="0" Background="{DynamicResource SurfaceAltBrush}">
+            <!-- Sidebar: icon + text label per page (HMCL's left nav), flat selected fill -->
+            <Border Grid.Column="0" Background="{DynamicResource SurfaceBrush}">
                 <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
-                    <ItemsControl ItemsSource="{Binding Pages}" Padding="0,10">
+                    <ItemsControl ItemsSource="{Binding Pages}" Padding="8,10">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
-                                <!-- Icon button: no text label, just the emoji; tooltip carries the title.
-                                     `nav` is a static class for the base style; `active` is toggled by the
-                                     NavActiveConverter (CurrentPage equality) for the selected highlight. -->
-                                <Button Classes="nav" CornerRadius="8"
-                                        Width="40" Height="40"
-                                        Padding="0" Margin="0,3"
-                                        HorizontalAlignment="Center" VerticalAlignment="Center"
-                                        HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
+                                <Button Classes="nav" CornerRadius="4"
+                                        Width="134" Height="34"
+                                        Padding="10,0" Margin="0,1"
+                                        HorizontalAlignment="Left"
                                         BorderThickness="0"
                                         Foreground="{DynamicResource TextPrimaryBrush}"
                                         Command="{Binding #Shell.DataContext.NavigateToCommand}"
                                         CommandParameter="{Binding}"
-                                        Tag="{Binding TitleKey}"
                                         ToolTip.Tip="{Binding LocalizedTitle}">
                                     <Classes.active>
                                         <MultiBinding Converter="{StaticResource NavActiveConverter}">
@@ -79,8 +65,11 @@
                                             <Binding/>
                                         </MultiBinding>
                                     </Classes.active>
-                                    <TextBlock Text="{Binding Icon}" FontSize="18"
-                                               HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <TextBlock Text="{Binding Icon}" FontSize="13" VerticalAlignment="Center"/>
+                                        <TextBlock Text="{Binding LocalizedTitle}" FontSize="12.5"
+                                                   VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+                                    </StackPanel>
                                 </Button>
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
@@ -88,73 +77,62 @@
                 </ScrollViewer>
             </Border>
 
-            <!-- Content area: the active page view is rendered here via ViewLocator -->
-            <DockPanel Grid.Column="1" Background="{DynamicResource PanelAltBrush}">
-                <!-- Page header (HMCL shows the current section title at the top of the content) -->
-                <Border DockPanel.Dock="Top" Background="{DynamicResource PanelAltBrush}" Padding="24,14">
-                    <TextBlock Text="{Binding CurrentPage.LocalizedTitle}" FontSize="18" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}"/>
-                </Border>
-
-                <!-- The page itself (with slide transition between pages) -->
-                <TransitioningContentControl Content="{Binding CurrentPage}" Margin="0">
-                    <TransitioningContentControl.PageTransition>
-                        <PageSlide Duration="0:0:0.2" Orientation="Horizontal" SlideOutEasing="CubicEaseIn" SlideInEasing="CubicEaseOut"/>
-                    </TransitioningContentControl.PageTransition>
-                </TransitioningContentControl>
-            </DockPanel>
-        </Grid> <!-- end sidebar+content grid -->
-    </Grid> <!-- end title bar + content grid -->
-    </Grid> <!-- end outer grid (background + content) -->
+            <!-- Content area: the active page view (instant switch, no slide animation) -->
+            <ContentControl Content="{Binding CurrentPage}" Grid.Column="1"/>
+        </Grid>
+    </Grid>
 
     <Window.Styles>
-        <!-- HMCL-style icon nav button base -->
+        <!-- Nav button base: flat, transparent until hover/selected. -->
         <Style Selector="Button.nav">
             <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="HorizontalContentAlignment" Value="Left"/>
         </Style>
         <Style Selector="Button.nav /template/ ContentPresenter">
             <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="CornerRadius" Value="4"/>
         </Style>
-        <!-- Subtle hover -->
         <Style Selector="Button.nav:pointerover /template/ ContentPresenter">
             <Setter Property="Background" Value="{DynamicResource NavHoverBrush}"/>
         </Style>
-        <!-- Selected item: semi-transparent accent fill + white icon -->
-        <Style Selector="Button.nav.active">
-            <Setter Property="Foreground" Value="White"/>
-        </Style>
+        <!-- Selected: flat light fill (HMCL look) + keep text color. -->
         <Style Selector="Button.nav.active /template/ ContentPresenter">
             <Setter Property="Background" Value="{DynamicResource NavActiveBrush}"/>
         </Style>
         <Style Selector="Button.nav.active:pointerover /template/ ContentPresenter">
-            <Setter Property="Background" Value="{DynamicResource NavActiveHoverBrush}"/>
+            <Setter Property="Background" Value="{DynamicResource NavActiveBrush}"/>
         </Style>
-        <!-- Custom title-bar button styles (PCL-style window controls) -->
+        <!-- Title-bar buttons. -->
         <Style Selector="Button.titleBtn">
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
-            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
+            <Setter Property="CornerRadius" Value="0"/>
             <Setter Property="Padding" Value="0"/>
         </Style>
-        <Style Selector="Button.titleBtn:pointerover">
-            <Setter Property="Background" Value="{DynamicResource SurfaceAltBrush}"/>
-            <Setter Property="Foreground" Value="White"/>
+        <Style Selector="Button.titleBtn /template/ ContentPresenter">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="CornerRadius" Value="0"/>
+        </Style>
+        <Style Selector="Button.titleBtn:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource NavHoverBrush}"/>
         </Style>
         <Style Selector="Button.titleBtnClose">
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
-            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
+            <Setter Property="CornerRadius" Value="0"/>
             <Setter Property="Padding" Value="0"/>
         </Style>
+        <Style Selector="Button.titleBtnClose /template/ ContentPresenter">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="CornerRadius" Value="0"/>
+        </Style>
+        <Style Selector="Button.titleBtnClose:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource DangerBrush}"/>
+        </Style>
         <Style Selector="Button.titleBtnClose:pointerover">
-            <Setter Property="Background" Value="#e81123"/>
             <Setter Property="Foreground" Value="White"/>
         </Style>
     </Window.Styles>
-
-    <Window.DataTemplates>
-        <v:ViewLocator/>
-    </Window.DataTemplates>
 </Window>

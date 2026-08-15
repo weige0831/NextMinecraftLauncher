@@ -5,47 +5,46 @@
 
     <Application.Resources>
         <ResourceDictionary>
-            <!-- Variant-scoped design tokens. Each surface/text token has both a Dark and a Light
-                 palette keyed by ThemeDictionaries, so the Settings page's dark/light/system toggle
-                 recolors NML's own surfaces (not just FluentTheme chrome). Accent/Success/Danger are
-                 shared across variants (accent is user-overridable at runtime). -->
+            <!-- Variant-scoped design tokens (HMCL-style flat, opaque palette — no translucency,
+                 no backdrop effects; the theme toggle just swaps solid colors). Accent/Success/
+                 Danger are shared across variants (accent is user-overridable at runtime). -->
             <ResourceDictionary.ThemeDictionaries>
-                <!-- DARK (default): translucent dark surfaces so the Mica backdrop shows through. -->
+                <!-- DARK (default): flat dark grays like HMCL's dark theme. -->
                 <ResourceDictionary x:Key="Dark">
-                    <SolidColorBrush x:Key="SurfaceBrush" Color="#E80A0A0E"/>
-                    <SolidColorBrush x:Key="SurfaceAltBrush" Color="#D81A1A1E"/>
-                    <SolidColorBrush x:Key="PanelBrush" Color="#CC1F1F25"/>
-                    <SolidColorBrush x:Key="PanelAltBrush" Color="#CC25252B"/>
-                    <SolidColorBrush x:Key="TextPrimaryBrush" Color="#E8E0E0E0"/>
-                    <SolidColorBrush x:Key="TextSecondaryBrush" Color="#B0AAAAAA"/>
-                    <SolidColorBrush x:Key="TextMutedBrush" Color="#90666666"/>
-                    <!-- Nav/title button surfaces tuned for the dark sidebar. -->
-                    <SolidColorBrush x:Key="NavHoverBrush" Color="#1AFFFFFF"/>
-                    <SolidColorBrush x:Key="NavActiveBrush" Color="#334fc3f7"/>
-                    <SolidColorBrush x:Key="SmallButtonBgBrush" Color="#33333b"/>
-                    <SolidColorBrush x:Key="SmallButtonHoverBgBrush" Color="#404048"/>
-                    <SolidColorBrush x:Key="DangerButtonBgBrush" Color="#b23b3b"/>
+                    <SolidColorBrush x:Key="SurfaceBrush" Color="#FF1E1E22"/>
+                    <SolidColorBrush x:Key="SurfaceAltBrush" Color="#FF25252A"/>
+                    <SolidColorBrush x:Key="PanelBrush" Color="#FF2A2A30"/>
+                    <SolidColorBrush x:Key="PanelAltBrush" Color="#FF303036"/>
+                    <SolidColorBrush x:Key="TextPrimaryBrush" Color="#FFE6E6E8"/>
+                    <SolidColorBrush x:Key="TextSecondaryBrush" Color="#FFA8A8AE"/>
+                    <SolidColorBrush x:Key="TextMutedBrush" Color="#FF707078"/>
+                    <!-- Nav: flat hover + a light selected fill (HMCL's selected item look). -->
+                    <SolidColorBrush x:Key="NavHoverBrush" Color="#FF33333A"/>
+                    <SolidColorBrush x:Key="NavActiveBrush" Color="#FF3E3E46"/>
+                    <SolidColorBrush x:Key="SmallButtonBgBrush" Color="#FF3A3A42"/>
+                    <SolidColorBrush x:Key="SmallButtonHoverBgBrush" Color="#FF46464F"/>
+                    <SolidColorBrush x:Key="DangerButtonBgBrush" Color="#FFB23B3B"/>
                 </ResourceDictionary>
-                <!-- LIGHT: opaque light surfaces + dark text, so light mode is actually usable. -->
+                <!-- LIGHT: flat light grays + dark text. -->
                 <ResourceDictionary x:Key="Light">
-                    <SolidColorBrush x:Key="SurfaceBrush" Color="#FFF5F5F7"/>
-                    <SolidColorBrush x:Key="SurfaceAltBrush" Color="#FFEAEAEE"/>
-                    <SolidColorBrush x:Key="PanelBrush" Color="#CCFFFFFF"/>
-                    <SolidColorBrush x:Key="PanelAltBrush" Color="#CCF0F0F4"/>
-                    <SolidColorBrush x:Key="TextPrimaryBrush" Color="#E8222222"/>
-                    <SolidColorBrush x:Key="TextSecondaryBrush" Color="#B0555555"/>
-                    <SolidColorBrush x:Key="TextMutedBrush" Color="#90888888"/>
-                    <SolidColorBrush x:Key="NavHoverBrush" Color="#22000000"/>
-                    <SolidColorBrush x:Key="NavActiveBrush" Color="#334fc3f7"/>
-                    <SolidColorBrush x:Key="SmallButtonBgBrush" Color="#FFD0D0D8"/>
-                    <SolidColorBrush x:Key="SmallButtonHoverBgBrush" Color="#FFC0C0C8"/>
+                    <SolidColorBrush x:Key="SurfaceBrush" Color="#FFF3F3F5"/>
+                    <SolidColorBrush x:Key="SurfaceAltBrush" Color="#FFEAEAEC"/>
+                    <SolidColorBrush x:Key="PanelBrush" Color="#FFFFFFFF"/>
+                    <SolidColorBrush x:Key="PanelAltBrush" Color="#FFF6F6F8"/>
+                    <SolidColorBrush x:Key="TextPrimaryBrush" Color="#FF1F1F23"/>
+                    <SolidColorBrush x:Key="TextSecondaryBrush" Color="#FF5A5A62"/>
+                    <SolidColorBrush x:Key="TextMutedBrush" Color="#FF8A8A92"/>
+                    <SolidColorBrush x:Key="NavHoverBrush" Color="#FFE2E2E6"/>
+                    <SolidColorBrush x:Key="NavActiveBrush" Color="#FFD8D8DE"/>
+                    <SolidColorBrush x:Key="SmallButtonBgBrush" Color="#FFE4E4E8"/>
+                    <SolidColorBrush x:Key="SmallButtonHoverBgBrush" Color="#FFD6D6DC"/>
                     <SolidColorBrush x:Key="DangerButtonBgBrush" Color="#FFC03030"/>
                 </ResourceDictionary>
             </ResourceDictionary.ThemeDictionaries>
             <!-- Shared across variants (accent is overridden live by SettingsPageViewModel). -->
-            <SolidColorBrush x:Key="AccentBrush" Color="#4fc3f7"/>
-            <SolidColorBrush x:Key="SuccessBrush" Color="#4caf50"/>
-            <SolidColorBrush x:Key="DangerBrush" Color="#f44336"/>
+            <SolidColorBrush x:Key="AccentBrush" Color="#FF3498DB"/>
+            <SolidColorBrush x:Key="SuccessBrush" Color="#FF3F9E4F"/>
+            <SolidColorBrush x:Key="DangerBrush" Color="#FFE04B4B"/>
         </ResourceDictionary>
     </Application.Resources>
 
@@ -53,13 +52,6 @@
         <FluentTheme />
         <!-- Unified button styles (defined once, used everywhere) -->
         <StyleInclude Source="avares://NML.App/Styles/Theme.axaml"/>
-        <Style Selector="Window">
-            <Setter Property="Transitions">
-                <Transitions>
-                    <DoubleTransition Property="Opacity" Duration="0:0:0.3" Easing="CubicEaseInOut"/>
-                </Transitions>
-            </Setter>
-        </Style>
         <Style Selector="Button.nav /template/ ContentPresenter">
             <Setter Property="Transitions">
                 <Transitions>

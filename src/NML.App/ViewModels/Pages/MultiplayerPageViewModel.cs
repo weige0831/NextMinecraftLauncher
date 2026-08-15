@@ -23,7 +23,7 @@ namespace NML.App.ViewModels.Pages;
 public partial class MultiplayerPageViewModel : PageViewModelBase
 {
     public override string TitleKey => "nav.multiplayer";
-    public override string Icon => "🌐";
+    public override string Icon => "◉";
 
     private readonly ServerListStore _store;
     private readonly ServerPinger _pinger;

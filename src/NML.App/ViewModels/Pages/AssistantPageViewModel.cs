@@ -14,7 +14,7 @@ namespace NML.App.ViewModels.Pages;
 public partial class AssistantPageViewModel : PageViewModelBase
 {
     public override string TitleKey => "nav.assistant";
-    public override string Icon => "🤖";
+    public override string Icon => "✦";
 
     private readonly ChatClientFactory _factory;
     private readonly SettingsStore _settings;

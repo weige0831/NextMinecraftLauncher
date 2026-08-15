@@ -12,7 +12,7 @@ namespace NML.App.ViewModels.Pages;
 public partial class ModsPageViewModel : PageViewModelBase
 {
     public override string TitleKey => "nav.mods";
-    public override string Icon => "🧩";
+    public override string Icon => "▦";
 
     private readonly ModrinthCatalog _catalog;
     private readonly ModRecommenderFactory _recommenderFactory;

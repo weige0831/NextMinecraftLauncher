@@ -18,7 +18,7 @@ namespace NML.App.ViewModels.Pages;
 public partial class DownloadPageViewModel : PageViewModelBase
 {
     public override string TitleKey => "nav.download";
-    public override string Icon => "⬇️";
+    public override string Icon => "↓";
 
     private readonly VersionManifestService _manifest;
     private readonly VanillaInstaller _vanillaInstaller;

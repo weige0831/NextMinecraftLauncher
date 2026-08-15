@@ -18,7 +18,7 @@ namespace NML.App.ViewModels.Pages;
 public partial class AccountsPageViewModel : PageViewModelBase
 {
     public override string TitleKey => "nav.accounts";
-    public override string Icon => "👤";
+    public override string Icon => "☺";
 
     private readonly IOfflineAuthProvider _offline;
     private readonly MicrosoftAuthProvider _microsoft;

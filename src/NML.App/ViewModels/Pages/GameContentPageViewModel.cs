@@ -20,7 +20,7 @@ namespace NML.App.ViewModels.Pages;
 public partial class GameContentPageViewModel : PageViewModelBase
 {
     public override string TitleKey => "nav.game_content";
-    public override string Icon => "📁";
+    public override string Icon => "▤";
 
     private readonly InstanceStore _instances;
     private readonly NML.Data.Modrinth.ModrinthCatalog? _modrinthCatalog;

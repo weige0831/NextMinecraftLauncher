@@ -3,7 +3,7 @@
 
     <!-- Small button: flat, compact, for toolbar/inline actions -->
     <Style Selector="Button.small">
-        <Setter Property="Padding" Value="10,4"/>
+        <Setter Property="Padding" Value="10,3"/>
         <Setter Property="FontSize" Value="12"/>
         <Setter Property="CornerRadius" Value="4"/>
         <Setter Property="Background" Value="{DynamicResource SmallButtonBgBrush}"/>
