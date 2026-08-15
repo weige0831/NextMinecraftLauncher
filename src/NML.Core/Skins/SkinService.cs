@@ -13,7 +13,18 @@ public sealed class SkinService
     private readonly IHttpFetcher? _http;
     private readonly string? _cacheDir;
 
-    /// <summary>Crafatar base URL. A reliable, widely-used free skin-rendering service.</summary>
+    /// <summary>Skin-texture provider URL templates ({0}=normalized UUID), in fallback order.
+    /// crafatar.com occasionally goes down (observed Cloudflare 521), so the texture download
+    /// falls through the mirrors. NOTE the path shapes differ: crafatar uses <c>/skins/</c>,
+    /// mc-heads and minotar use <c>/skin/</c>. (crafatar.org is dead — 000/no-route.)</summary>
+    public static readonly IReadOnlyList<string> ProviderTemplates = new[]
+    {
+        "https://crafatar.com/skins/{0}",
+        "https://mc-heads.net/skin/{0}",
+        "https://minotar.net/skin/{0}",
+    };
+
+    /// <summary>Primary provider base (kept for compatibility + tests).</summary>
     public const string CrafatarBase = "https://crafatar.com";
 
     /// <summary>Construct a URL-only service (no caching). Use the other ctor to enable downloads.</summary>
@@ -29,8 +40,8 @@ public sealed class SkinService
     /// <summary>
     /// Download the raw 64×64 skin PNG for <paramref name="uuid"/> into the cache and return its
     /// absolute path. Used by the launcher's own 3D cube preview (we render the skin ourselves
-    /// rather than relying on Crafatar's static renders). Falls back to the Steve default on
-    /// failure (offline UUIDs, network errors).
+    /// rather than relying on Crafatar's static renders). Tries each provider mirror in turn;
+    /// falls back to the Steve default on total failure (offline UUIDs, network errors).
     /// </summary>
     public async Task<string> DownloadSkinPngAsync(string uuid, CancellationToken ct = default)
     {
@@ -41,17 +52,26 @@ public sealed class SkinService
         string path = Path.Combine(_cacheDir, Normalize(uuid) + ".png");
         if (File.Exists(path)) return path; // idempotent
 
-        try
+        ValidateUuid(uuid);
+        string id = Normalize(uuid);
+        foreach (string template in ProviderTemplates)
         {
-            byte[] png = await _http.GetByteArrayAsync(SkinTextureUrl(uuid), ct);
-            await File.WriteAllBytesAsync(path, png, ct);
-            return path;
+            try
+            {
+                byte[] png = await _http.GetByteArrayAsync(string.Format(template, id), ct);
+                if (png.Length > 0)
+                {
+                    await File.WriteAllBytesAsync(path, png, ct);
+                    return path;
+                }
+            }
+            catch
+            {
+                // This provider is down or has no skin for the UUID — try the next mirror.
+            }
         }
-        catch
-        {
-            // Caller will detect the missing file and fall back to a default-skin path.
-            return string.Empty;
-        }
+        // Caller will detect the missing file and fall back to a default-skin path.
+        return string.Empty;
     }
 
     /// <summary>
@@ -84,7 +104,19 @@ public sealed class SkinService
     }
 
     /// <summary>
-    /// Build a skin-texture download URL (the raw skin PNG from Mojang's textures server).
+    /// Build skin-texture download URLs (raw skin PNG) for every provider mirror, in fallback
+    /// order. Consumers that fetch images themselves can walk this list instead of hardcoding
+    /// the primary provider.
+    /// </summary>
+    public IReadOnlyList<string> SkinTextureUrls(string uuid)
+    {
+        ValidateUuid(uuid);
+        string id = Normalize(uuid);
+        return ProviderTemplates.Select(t => string.Format(t, id)).ToList();
+    }
+
+    /// <summary>
+    /// Build a skin-texture download URL (the raw skin PNG from the primary provider).
     /// </summary>
     public string SkinTextureUrl(string uuid)
     {

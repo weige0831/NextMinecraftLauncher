@@ -52,7 +52,10 @@ public sealed class OptiFineInstaller
         }
     }
 
-    /// <summary>Parse BMCLAPI's OptiFine version list JSON.</summary>
+    /// <summary>Parse BMCLAPI's OptiFine version list JSON.
+    /// Real entry shape: { "mcversion":"1.12.2", "type":"HD_U", "patch":"C5",
+    /// "filename":"OptiFine_1.12.2_HD_U_C5.jar" } — note <c>type</c> is the product line
+    /// ("HD_U") and <c>patch</c> is the short version ("C5").</summary>
     internal static IReadOnlyList<OptiFineVersion> ParseBmclVersions(string json, string gameVersion)
     {
         var versions = new List<OptiFineVersion>();
@@ -61,16 +64,18 @@ public sealed class OptiFineInstaller
             using var doc = System.Text.Json.JsonDocument.Parse(json);
             foreach (var entry in doc.RootElement.EnumerateArray())
             {
-                string type = entry.TryGetProperty("type", out var t) ? t.GetString() ?? "" : "";
                 string patch = entry.TryGetProperty("patch", out var p) ? p.GetString() ?? "" : "";
-                if (string.IsNullOrEmpty(type)) continue;
+                string type = entry.TryGetProperty("type", out var t) ? t.GetString() ?? "" : "";
+                string filename = entry.TryGetProperty("filename", out var f) ? f.GetString() ?? "" : "";
+                if (string.IsNullOrEmpty(patch)) continue; // patch is the distinguishing short version
 
                 versions.Add(new OptiFineVersion
                 {
                     GameVersion = gameVersion,
-                    Type = type,
-                    Patch = patch,
-                    Display = $"OptiFine {gameVersion} HD U {type}" + (string.IsNullOrEmpty(patch) ? "" : $" {patch}"),
+                    Type = patch,                    // e.g. "C5" — used in profile id + display
+                    Patch = type,                    // e.g. "HD_U" (product line)
+                    FileName = filename,             // e.g. "OptiFine_1.12.2_HD_U_C5.jar"
+                    Display = $"OptiFine {gameVersion} {type} {patch}",
                 });
             }
         }
@@ -96,10 +101,24 @@ public sealed class OptiFineInstaller
         // Build the profile id: OptiFine uses "OptiFine_{mc}_{type}" as the version id.
         string profileId = $"OptiFine_{gameVersion}_{type}";
 
-        // Download the installer JAR from OptiFine's download endpoint.
-        string installerUrl = $"{InstallerBaseUrl}?f=OptiFine_{gameVersion}_HD_U_{type}.jar";
+        // Resolve the exact installer file name for this build. The caller passes the short
+        // version (e.g. "C5"); find the matching entry's filename from the version list so the
+        // download URL is exact (BMCLAPI serves /optifine/{mc}/{filename}).
+        string fileName = $"OptiFine_{gameVersion}_HD_U_{type}.jar"; // conservative fallback
+        try
+        {
+            var all = await ListVersionsAsync(gameVersion, ct);
+            var match = all.FirstOrDefault(v => string.Equals(v.Type, type, StringComparison.OrdinalIgnoreCase));
+            if (match is not null && !string.IsNullOrEmpty(match.FileName))
+                fileName = match.FileName;
+        }
+        catch { /* list lookup is best-effort; fall back to the constructed name */ }
+
+        // BMCLAPI mirrors the OptiFine installer JARs (optifine.net/downloadx only serves an
+        // HTML interstitial + is unreliable from CN). Path: /optifine/{mc}/{filename}.
+        string installerUrl = $"https://bmclapi2.bangbang93.com/optifine/{gameVersion}/{fileName}";
         Directory.CreateDirectory(installerCacheDir);
-        string installerJar = Path.Combine(installerCacheDir, $"OptiFine_{gameVersion}_{type}.jar");
+        string installerJar = Path.Combine(installerCacheDir, fileName);
 
         if (!File.Exists(installerJar))
         {
@@ -142,7 +161,11 @@ public sealed class OptiFineInstaller
 public sealed class OptiFineVersion
 {
     public string GameVersion { get; init; } = string.Empty;
+    /// <summary>Short version, e.g. "C5" (BMCLAPI's <c>patch</c> field).</summary>
     public string Type { get; init; } = string.Empty;
+    /// <summary>Product line, e.g. "HD_U" (BMCLAPI's <c>type</c> field).</summary>
     public string Patch { get; init; } = string.Empty;
+    /// <summary>Exact installer file name, e.g. "OptiFine_1.12.2_HD_U_C5.jar".</summary>
+    public string FileName { get; init; } = string.Empty;
     public string Display { get; init; } = string.Empty;
 }

@@ -187,4 +187,72 @@ public class SkinServiceTests
         public Task<NML.Core.Download.RangeResponse?> TryRangeDownloadAsync(string url, long from, long? to, CancellationToken ct = default) =>
             throw new HttpRequestException("network down");
     }
+
+    // ===== Provider fallback (crafatar.com was observed down with Cloudflare 521) =====
+
+    /// <summary>Fails the first N URLs, serves PNG bytes afterwards — simulates a mirror outage.</summary>
+    private sealed class FlakyFetcher : NML.Core.Download.IHttpFetcher
+    {
+        private int _failCount;
+        public List<string> RequestedUrls { get; } = new();
+        public FlakyFetcher(int failCount) => _failCount = failCount;
+
+        public Task<byte[]> GetByteArrayAsync(string url, CancellationToken ct = default)
+        {
+            RequestedUrls.Add(url);
+            if (_failCount-- > 0) throw new HttpRequestException("provider down");
+            return Task.FromResult(Convert.FromHexString("89504E470D0A1A0A"));
+        }
+        public Task<string> GetStringAsync(string url, CancellationToken ct = default) => Task.FromResult("{}");
+        public Task StreamToAsync(string url, Stream d, IProgress<long>? p = null, CancellationToken ct = default) => Task.CompletedTask;
+        public Task<NML.Core.Download.RangeResponse?> TryRangeDownloadAsync(string url, long f, long? t, CancellationToken ct = default) =>
+            Task.FromResult<NML.Core.Download.RangeResponse?>(null);
+    }
+
+    [Fact]
+    public async Task DownloadSkinPng_Falls_Back_To_Next_Mirror_When_Primary_Down()
+    {
+        // crafatar.com down → the download must proceed via mc-heads.net (mirror #2).
+        string cacheDir = Path.Combine(Path.GetTempPath(), "nml-skin-fb-" + Guid.NewGuid().ToString("N")[..8]);
+        Directory.CreateDirectory(cacheDir);
+        try
+        {
+            var fetcher = new FlakyFetcher(failCount: 1); // first URL (crafatar) fails
+            var svc = new SkinService(fetcher, cacheDir);
+            string path = await svc.DownloadSkinPngAsync(OnlineUuid);
+
+            path.Should().NotBeNullOrEmpty("the mirror should have served the skin");
+            fetcher.RequestedUrls.Should().HaveCount(2);
+            fetcher.RequestedUrls[0].Should().StartWith("https://crafatar.com/skins/");
+            fetcher.RequestedUrls[1].Should().StartWith("https://mc-heads.net/skin/",
+                "the fallback must use the correct per-provider path shape");
+            File.Exists(path).Should().BeTrue();
+        }
+        finally { try { Directory.Delete(cacheDir, recursive: true); } catch { } }
+    }
+
+    [Fact]
+    public async Task DownloadSkinPng_Returns_Empty_When_All_Mirrors_Down()
+    {
+        string cacheDir = Path.Combine(Path.GetTempPath(), "nml-skin-all-" + Guid.NewGuid().ToString("N")[..8]);
+        Directory.CreateDirectory(cacheDir);
+        try
+        {
+            var svc = new SkinService(new ThrowingFetcher(), cacheDir);
+            string path = await svc.DownloadSkinPngAsync(OnlineUuid);
+            path.Should().BeEmpty("total outage degrades gracefully");
+        }
+        finally { try { Directory.Delete(cacheDir, recursive: true); } catch { } }
+    }
+
+    [Fact]
+    public void SkinTextureUrls_Lists_All_Providers_In_Order()
+    {
+        var svc = new SkinService();
+        var urls = svc.SkinTextureUrls(OnlineUuid);
+        urls.Should().HaveCount(SkinService.ProviderTemplates.Count);
+        urls[0].Should().StartWith("https://crafatar.com/skins/");
+        urls[1].Should().StartWith("https://mc-heads.net/skin/");
+        urls[2].Should().StartWith("https://minotar.net/skin/");
+    }
 }
