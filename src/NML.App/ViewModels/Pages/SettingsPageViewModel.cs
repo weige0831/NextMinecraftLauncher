@@ -540,11 +540,34 @@ public partial class SettingsPageViewModel : PageViewModelBase
 
             string downloads = System.Environment.GetFolderPath(System.Environment.SpecialFolder.MyDocuments);
             if (string.IsNullOrEmpty(downloads)) downloads = System.IO.Path.GetTempPath();
-            string dest = System.IO.Path.Combine(downloads, asset.Name);
+            // SECURITY: the asset name comes from the API — sanitize to a single file segment so
+            // it can't escape the downloads dir (asset names are GitHub-controlled, but be safe).
+            string safeName = string.Concat(asset.Name.Where(ch => !System.IO.Path.GetInvalidFileNameChars().Contains(ch)));
+            string dest = System.IO.Path.Combine(downloads, safeName);
+
+            // SECURITY: only accept download URLs from GitHub hosts. A tampered API response
+            // pointing elsewhere must not be auto-downloaded + executed.
+            if (!IsTrustedUpdateHost(asset.Url))
+            {
+                Status = $"update.untrusted_host,{new Uri(asset.Url).Host}";
+                _logger.LogWarning("Refusing update from untrusted host: {Url}", asset.Url);
+                return;
+            }
+
             Status = $"update.downloading,{asset.Name}";
             if (_httpFetcher is not null)
             {
                 await _httpFetcher.StreamToAsync(asset.Url, System.IO.File.Create(dest), null);
+            }
+
+            // SECURITY: verify the download's SHA-256 against the digest GitHub reports in the
+            // API before it is ever swapped over the running exe (supply-chain guard).
+            if (!string.IsNullOrEmpty(asset.Digest) && !await VerifySha256Async(dest, asset.Digest))
+            {
+                System.IO.File.Delete(dest);
+                Status = "update.hash_mismatch";
+                _logger.LogError("Update asset {Name} failed SHA-256 verification; deleted.", asset.Name);
+                return;
             }
 
             // If it's an exe asset and we're a single-file publish, offer in-place apply:
@@ -619,6 +642,36 @@ public partial class SettingsPageViewModel : PageViewModelBase
     {
         try { System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(url) { UseShellExecute = true }); }
         catch { /* non-fatal */ }
+    }
+
+    /// <summary>Only GitHub hosts may serve the self-update binary (supply-chain guard).</summary>
+    private static bool IsTrustedUpdateHost(string url)
+    {
+        try
+        {
+            var host = new Uri(url).Host;
+            return host.Equals("github.com", StringComparison.OrdinalIgnoreCase) ||
+                   host.Equals("objects.githubusercontent.com", StringComparison.OrdinalIgnoreCase) ||
+                   host.Equals("release-assets.githubusercontent.com", StringComparison.OrdinalIgnoreCase) ||
+                   host.EndsWith(".github.com", StringComparison.OrdinalIgnoreCase) ||
+                   host.EndsWith(".githubusercontent.com", StringComparison.OrdinalIgnoreCase);
+        }
+        catch { return false; }
+    }
+
+    /// <summary>Verify a file's SHA-256 against GitHub's "sha256:&lt;hex&gt;" digest string.</summary>
+    private static async Task<bool> VerifySha256Async(string path, string digest)
+    {
+        try
+        {
+            string hex = digest.Trim();
+            if (hex.StartsWith("sha256:", StringComparison.OrdinalIgnoreCase)) hex = hex["sha256:".Length..];
+            using var sha = System.Security.Cryptography.SHA256.Create();
+            await using var fs = System.IO.File.OpenRead(path);
+            byte[] hash = await sha.ComputeHashAsync(fs);
+            return string.Equals(Convert.ToHexString(hash), hex, StringComparison.OrdinalIgnoreCase);
+        }
+        catch { return false; }
     }
 
     private static void OpenInExplorer(string path)

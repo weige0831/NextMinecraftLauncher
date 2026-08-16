@@ -194,7 +194,7 @@ public partial class HomePageViewModel : PageViewModelBase
         bool hasSearch = !string.IsNullOrWhiteSpace(ConsoleSearchText);
         if (hasSearch && IsConsoleRegexSearch)
         {
-            try { regex = new Regex(ConsoleSearchText, RegexOptions.IgnoreCase); }
+            try { regex = new Regex(ConsoleSearchText, RegexOptions.IgnoreCase, TimeSpan.FromMilliseconds(250)); }
             catch (ArgumentException) { ConsoleLines.Clear(); return; } // invalid pattern → empty
         }
 

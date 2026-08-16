@@ -201,7 +201,7 @@ public partial class GameContentPageViewModel : PageViewModelBase
         bool hasSearch = !string.IsNullOrWhiteSpace(LogSearchText);
         if (hasSearch && IsRegexSearch)
         {
-            try { regex = new Regex(LogSearchText, RegexOptions.IgnoreCase); }
+            try { regex = new Regex(LogSearchText, RegexOptions.IgnoreCase, TimeSpan.FromMilliseconds(250)); }
             catch (ArgumentException) { FilteredLogLines.Clear(); return; } // invalid pattern
         }
 

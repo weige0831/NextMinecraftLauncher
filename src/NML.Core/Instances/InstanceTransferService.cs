@@ -2,6 +2,7 @@ using System.IO.Compression;
 using System.Text.Json;
 using Microsoft.Extensions.Logging;
 using NML.Core;
+using NML.Core.Download;
 using NML.Core.Instances;
 
 namespace NML.Core.Instances;
@@ -169,10 +170,8 @@ public sealed class InstanceTransferService
         foreach (ZipArchiveEntry e in archive.Entries)
         {
             if (e.FullName == "instance.json") continue;
-            string dest = Path.Combine(gameDir, e.FullName);
-            string? dir = Path.GetDirectoryName(dest);
-            if (dir is not null) Directory.CreateDirectory(dir);
-            e.ExtractToFile(dest, overwrite: true);
+            // Zip Slip guard: reject entries that escape the instance's game dir.
+            ZipSafeExtractor.ExtractEntry(e, gameDir);
         }
 
         // Persist the new instance.

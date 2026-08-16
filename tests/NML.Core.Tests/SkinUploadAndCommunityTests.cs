@@ -51,7 +51,10 @@ public class SkinUploadServiceTests
 }
 
 /// <summary>
-/// Validates the MineSkin community-source JSON parsing against canned payloads.
+/// Validates the MineSkin community-source JSON parsing against the CURRENT API shape
+/// (verified live 2026-08): { "skins": [ { "id":1370552387, "uuid":"hex",
+/// "url":"http://textures.minecraft.net/texture/<hash>" } ] } — the old name/variant
+/// fields are gone from the list endpoint.
 /// </summary>
 public class MineSkinSourceTests
 {
@@ -61,17 +64,33 @@ public class MineSkinSourceTests
         string json = """
             {
               "skins": [
-                { "id": "abc123", "name": "Cool Skin", "variant": "classic", "url": "https://example/skin.png" },
-                { "id": "def456", "name": "Slim Skin", "variant": "slim" }
+                { "id": 1370552387, "uuid": "5d8fcbe06e0a419bb985b53c2c8f01dc", "url": "https://textures.minecraft.net/texture/aaa" },
+                { "id": 1370552388, "uuid": "6e8fcbe06e0a419bb985b53c2c8f01dd", "url": "https://textures.minecraft.net/texture/bbb" }
               ]
             }
             """;
         var source = new MineSkinSource(new CannedFetcher(json));
         IReadOnlyList<CommunitySkin> skins = await source.BrowseAsync();
         skins.Should().HaveCount(2);
-        skins[0].Name.Should().Be("Cool Skin");
-        skins[0].Model.Should().Be("classic");
-        skins[1].Model.Should().Be("slim");
+        skins[0].Id.Should().Be("5d8fcbe06e0a419bb985b53c2c8f01dc");
+        skins[0].DownloadUrl.Should().Be("https://textures.minecraft.net/texture/aaa",
+            "the API-provided official textures URL is used directly");
+        skins[0].PreviewUrl.Should().NotContain("decks.cf", "the unaffiliated mirror domain is gone");
+    }
+
+    [Fact]
+    public async Task Skips_Entries_Without_Url()
+    {
+        string json = """
+            { "skins": [
+                { "id": 1, "uuid": "abc" },
+                { "id": 2, "uuid": "def", "url": "https://textures.minecraft.net/texture/x" }
+            ] }
+            """;
+        var source = new MineSkinSource(new CannedFetcher(json));
+        IReadOnlyList<CommunitySkin> skins = await source.BrowseAsync();
+        skins.Should().ContainSingle();
+        skins[0].Id.Should().Be("def");
     }
 
     [Fact]
@@ -83,18 +102,19 @@ public class MineSkinSourceTests
     }
 
     [Fact]
-    public async Task Search_filters_by_name()
+    public async Task Search_matches_generated_display_names()
     {
+        // The new API has no name field; entries get "Skin {uuid-prefix}" — search by that prefix.
         string json = """
             { "skins": [
-                { "id": "1", "name": "Steve", "variant": "classic" },
-                { "id": "2", "name": "Alex", "variant": "slim" }
+                { "id": 1, "uuid": "aaaa1111aaaa", "url": "https://textures.minecraft.net/texture/a" },
+                { "id": 2, "uuid": "bbbb2222bbbb", "url": "https://textures.minecraft.net/texture/b" }
             ] }
             """;
         var source = new MineSkinSource(new CannedFetcher(json));
-        IReadOnlyList<CommunitySkin> result = await source.SearchAsync("alex");
+        IReadOnlyList<CommunitySkin> result = await source.SearchAsync("bbbb2222");
         result.Should().ContainSingle();
-        result[0].Name.Should().Be("Alex");
+        result[0].Id.Should().Be("bbbb2222bbbb");
     }
 }
 

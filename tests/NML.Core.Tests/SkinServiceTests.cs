@@ -224,7 +224,7 @@ public class SkinServiceTests
             path.Should().NotBeNullOrEmpty("the mirror should have served the skin");
             fetcher.RequestedUrls.Should().HaveCount(2);
             fetcher.RequestedUrls[0].Should().StartWith("https://crafatar.com/skins/");
-            fetcher.RequestedUrls[1].Should().StartWith("https://mc-heads.net/skin/",
+            fetcher.RequestedUrls[1].Should().StartWith("https://minotar.net/skin/",
                 "the fallback must use the correct per-provider path shape");
             File.Exists(path).Should().BeTrue();
         }
@@ -252,7 +252,7 @@ public class SkinServiceTests
         var urls = svc.SkinTextureUrls(OnlineUuid);
         urls.Should().HaveCount(SkinService.ProviderTemplates.Count);
         urls[0].Should().StartWith("https://crafatar.com/skins/");
-        urls[1].Should().StartWith("https://mc-heads.net/skin/");
-        urls[2].Should().StartWith("https://minotar.net/skin/");
+        urls[1].Should().StartWith("https://minotar.net/skin/", "minotar verified up; sits before mc-heads (403)");
+        urls[2].Should().StartWith("https://mc-heads.net/skin/");
     }
 }

@@ -10,6 +10,8 @@ public sealed class UpdateAsset
     /// <summary>The direct download URL (browser_download_url) for this asset.</summary>
     public string Url { get; init; } = string.Empty;
     public long Size { get; init; }
+    /// <summary>GitHub-reported SHA-256 ("sha256:&lt;hex&gt;"), when available, to verify downloads.</summary>
+    public string Digest { get; init; } = string.Empty;
 }
 
 /// <summary>Information about a new release available for download.</summary>
@@ -117,7 +119,11 @@ public sealed class UpdateChecker
             string url = a.TryGetProperty("browser_download_url", out var u) && u.ValueKind == JsonValueKind.String
                 ? (u.GetString() ?? "") : "";
             long size = a.TryGetProperty("size", out var sz) && sz.TryGetInt64(out long s) ? s : 0;
-            if (!string.IsNullOrEmpty(url)) list.Add(new UpdateAsset { Name = name, Url = url, Size = size });
+            // GitHub reports the asset SHA-256 digest as "sha256:<hex>" — used to verify the
+            // download before any self-replace (supply-chain guard).
+            string digest = a.TryGetProperty("digest", out var dg) && dg.ValueKind == JsonValueKind.String
+                ? (dg.GetString() ?? "") : "";
+            if (!string.IsNullOrEmpty(url)) list.Add(new UpdateAsset { Name = name, Url = url, Size = size, Digest = digest });
         }
         return list;
     }

@@ -114,16 +114,27 @@ public sealed class OptiFineInstaller
         }
         catch { /* list lookup is best-effort; fall back to the constructed name */ }
 
-        // BMCLAPI mirrors the OptiFine installer JARs (optifine.net/downloadx only serves an
-        // HTML interstitial + is unreliable from CN). Path: /optifine/{mc}/{filename}.
-        string installerUrl = $"https://bmclapi2.bangbang93.com/optifine/{gameVersion}/{fileName}";
+        // BMCLAPI mirrors the OptiFine installer JARs. Verified path shape: /optifine/{filename}
+        // (NO mc-version segment — /optifine/{mc}/{filename} is a 404). optifine.net/downloadx
+        // also serves the jar but is unreliable from CN; BMCLAPI first, official as fallback.
+        string bmclUrl = $"https://bmclapi2.bangbang93.com/optifine/{fileName}";
+        string officialUrl = $"{InstallerBaseUrl}?f={fileName}";
         Directory.CreateDirectory(installerCacheDir);
         string installerJar = Path.Combine(installerCacheDir, fileName);
 
         if (!File.Exists(installerJar))
         {
-            _logger.LogInformation("Downloading OptiFine installer from {Url}…", installerUrl);
-            byte[] bytes = await _http.GetByteArrayAsync(installerUrl, ct);
+            _logger.LogInformation("Downloading OptiFine installer from {Url}…", bmclUrl);
+            byte[] bytes;
+            try
+            {
+                bytes = await _http.GetByteArrayAsync(bmclUrl, ct);
+            }
+            catch
+            {
+                _logger.LogWarning("BMCLAPI download failed; falling back to optifine.net for {File}.", fileName);
+                bytes = await _http.GetByteArrayAsync(officialUrl, ct);
+            }
             await File.WriteAllBytesAsync(installerJar, bytes, ct);
         }
 

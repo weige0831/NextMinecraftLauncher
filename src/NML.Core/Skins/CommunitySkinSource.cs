@@ -64,32 +64,29 @@ public sealed class MineSkinSource : ICommunitySkinSource
         try
         {
             using var doc = JsonDocument.Parse(json);
-            // The list endpoint returns { "skins": [ { "id":.., "name":.., "variant":.., "url":.., "texture":.. } ] }
+            // Current list shape (2026-08, verified live): { "skins": [ { "id":1370552387,
+            // "skinUuid":"hex", "uuid":"hex", "url":"http://textures.minecraft.net/texture/<hash>" } ] }
+            // 'name'/'variant' are gone; 'id' is numeric. Preview = the official Mojang textures
+            // URL straight from the API (SECURITY: replaces the unaffiliated mineskin.decks.cf).
             if (!doc.RootElement.TryGetProperty("skins", out var skins)) return Array.Empty<CommunitySkin>();
 
             var list = new List<CommunitySkin>();
             foreach (var s in skins.EnumerateArray())
             {
-                string id = s.TryGetProperty("id", out var idEl) && idEl.ValueKind == JsonValueKind.String
-                    ? idEl.GetString() ?? "" : "";
-                string name = s.TryGetProperty("name", out var nEl) && nEl.ValueKind == JsonValueKind.String
-                    ? nEl.GetString() ?? id : id;
-                string variant = s.TryGetProperty("variant", out var vEl) && vEl.ValueKind == JsonValueKind.String
-                    ? vEl.GetString() ?? "classic" : "classic";
+                string uuid = s.TryGetProperty("uuid", out var uuidEl) && uuidEl.ValueKind == JsonValueKind.String
+                    ? uuidEl.GetString() ?? "" : "";
                 string? url = s.TryGetProperty("url", out var uEl) && uEl.ValueKind == JsonValueKind.String
                     ? uEl.GetString() : null;
+                if (string.IsNullOrEmpty(uuid) || string.IsNullOrEmpty(url)) continue;
 
-                if (string.IsNullOrEmpty(id)) continue;
-                // Build a Crafatar-independent preview using the MineSkin "img" endpoint if available.
-                string preview = $"https://mineskin.decks.cf/preview/{id}";
                 list.Add(new CommunitySkin
                 {
-                    Id = id,
-                    Name = name,
+                    Id = uuid,
+                    Name = $"Skin {uuid[..Math.Min(8, uuid.Length)]}",
                     Author = "community",
-                    Model = variant,
-                    PreviewUrl = preview,
-                    DownloadUrl = url ?? $"{Base}/texture/{id}",
+                    Model = "classic",
+                    PreviewUrl = url,
+                    DownloadUrl = url,
                 });
             }
             return list;

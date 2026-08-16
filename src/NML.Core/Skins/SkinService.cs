@@ -14,14 +14,14 @@ public sealed class SkinService
     private readonly string? _cacheDir;
 
     /// <summary>Skin-texture provider URL templates ({0}=normalized UUID), in fallback order.
-    /// crafatar.com occasionally goes down (observed Cloudflare 521), so the texture download
-    /// falls through the mirrors. NOTE the path shapes differ: crafatar uses <c>/skins/</c>,
-    /// mc-heads and minotar use <c>/skin/</c>. (crafatar.org is dead — 000/no-route.)</summary>
+    /// crafatar.com occasionally goes down (observed Cloudflare 521) and mc-heads.net started
+    /// returning 403 (2026-08, region/IP-block), so minotar (verified up) sits second.
+    /// Path shapes differ: crafatar uses <c>/skins/</c>, mc-heads and minotar use <c>/skin/</c>.</summary>
     public static readonly IReadOnlyList<string> ProviderTemplates = new[]
     {
         "https://crafatar.com/skins/{0}",
-        "https://mc-heads.net/skin/{0}",
         "https://minotar.net/skin/{0}",
+        "https://mc-heads.net/skin/{0}",
     };
 
     /// <summary>Primary provider base (kept for compatibility + tests).</summary>

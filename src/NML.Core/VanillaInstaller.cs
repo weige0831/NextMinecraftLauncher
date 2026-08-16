@@ -368,7 +368,7 @@ public sealed class VanillaInstaller
                 ct.ThrowIfCancellationRequested();
                 if (exclude is not null && IsExcluded(entry.FullName, exclude)) continue;
 
-                string dest = Path.Combine(mc.NativesDir, entry.FullName);
+                string dest = Download.ZipSafeExtractor.SafeDestination(mc.NativesDir, entry.FullName);
                 string? dir = Path.GetDirectoryName(dest);
                 if (dir is not null) Directory.CreateDirectory(dir);
 

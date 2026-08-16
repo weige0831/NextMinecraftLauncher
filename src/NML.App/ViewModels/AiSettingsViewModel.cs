@@ -136,7 +136,9 @@ public partial class AiSettingsViewModel : ObservableObject
     private void PersistSettings()
     {
         LauncherSettings s = _settings.Load();
-        s.Providers = Providers.ToList();
+        // SECURITY: strip API keys before persisting — settings.json is plaintext; the real
+        // keys live only in the DPAPI secret store (re-attached on load by ReloadFromDisk).
+        s.Providers = Providers.Select(p => p.WithApiKey(null)).ToList();
         s.ActiveProviderName = ActiveProvider?.Name;
         _settings.Save(s);
     }

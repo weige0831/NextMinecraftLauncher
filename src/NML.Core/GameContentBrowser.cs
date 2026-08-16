@@ -1,3 +1,5 @@
+using NML.Core.Download;
+
 namespace NML.Core;
 
 /// <summary>
@@ -244,8 +246,8 @@ public sealed class GameContentBrowser
         {
             ct.ThrowIfCancellationRequested();
 
-            // Zip entries use forward slashes; normalize for the host OS.
-            string dest = Path.Combine(worldDir, entry.FullName.Replace('\\', '/'));
+            // Zip Slip guard: a tampered backup must not escape saves/{world}.
+            string dest = ZipSafeExtractor.SafeDestination(worldDir, entry.FullName);
             // Directory entries: create and continue (Length is 0 for them).
             if (entry.Length == 0 && (entry.FullName.EndsWith('/') || entry.FullName.EndsWith('\\')))
             {

@@ -196,10 +196,8 @@ public sealed class ModpackInstaller
             string rel = entry.FullName[prefix.Length..];
             if (string.IsNullOrEmpty(rel) || rel.EndsWith('/')) continue;
 
-            string dest = Path.Combine(gameDir, rel);
-            string? dir = Path.GetDirectoryName(dest);
-            if (dir is not null) Directory.CreateDirectory(dir);
-            entry.ExtractToFile(dest, overwrite: true);
+            // Zip Slip guard: overrides paths come from a remote modpack zip — reject traversal.
+            ZipSafeExtractor.ExtractEntry(entry, gameDir, rel);
         }
     }
 }

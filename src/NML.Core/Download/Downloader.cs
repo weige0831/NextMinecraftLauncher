@@ -31,8 +31,10 @@ public sealed class Downloader
         IProgress<long>? progress = null,
         CancellationToken ct = default)
     {
-        string fullDir = Path.Combine(targetDir, Path.GetDirectoryName(relativePath) ?? string.Empty);
-        string fullPath = Path.Combine(targetDir, relativePath);
+        // Path-injection guard: relativePath comes from remote manifests (Modrinth/CurseForge
+        // filenames, .mrpack paths) — reject rooted names and traversal out of targetDir.
+        string fullPath = ZipSafeExtractor.SafeDestination(targetDir, relativePath);
+        string fullDir = Path.GetDirectoryName(fullPath) ?? targetDir;
         Directory.CreateDirectory(fullDir);
 
         // Idempotency: skip if the existing file already matches the expected SHA-1 and size.
